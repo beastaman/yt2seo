@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { YouTubeVideoFetcher } from './YouTubeVideoFetcher'
 import { BlogPostGenerator } from './BlogPostGenerator'
+import { YouTubeVideoData } from '@/components/YouTubeVideoFetcher'
 
 export function SEOBlogGenerator() {
-  const [videoData, setVideoData] = useState(null)
+  const [videoData, setVideoData] = useState<YouTubeVideoData | null>(null)
 
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-8">

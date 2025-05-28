@@ -101,8 +101,11 @@ Format the output as a JSON object with the following structure:
       ]
     });
 
-    return JSON.parse(completion.choices[0].message.content);
-  } catch (error) {
+const content = completion.choices[0].message.content;
+if (!content) {
+  throw new Error('No content returned from AI completion');
+}
+return JSON.parse(content);  } catch (error) {
     console.error('Error analyzing video and generating blog content:', error);
     throw error;
   }
@@ -117,7 +120,14 @@ export async function generateImages(descriptions: string[]): Promise<ImageData[
         n: 1,
         size: "1024x1024",
       });
-      return { url: response.data[0].url, alt: description };
+      // Check for response.data and response.data[0].url
+      const url = response.data && response.data[0] && response.data[0].url
+        ? response.data[0].url
+        : undefined;
+      if (!url) {
+        throw new Error('No image URL returned from OpenAI');
+      }
+      return { url, alt: description };
     });
 
     return await Promise.all(imagePromises);

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { generateBlogContent, generateImage } from '../utils/ai'
 import Image from 'next/image'
+import { analyzeVideoAndGenerateBlogPost, BlogPost, generateImages, ImageData as AIImageData } from '@/app/utils/ai'
 
 interface BlogPostGeneratorProps {
   videoData: {
@@ -12,14 +12,14 @@ interface BlogPostGeneratorProps {
 }
 
 export function BlogPostGenerator({ videoData }: BlogPostGeneratorProps) {
-  const [blogPost, setBlogPost] = useState<any>(null)
-  const [images, setImages] = useState<string[]>([])
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [blogPost, setBlogPost] = useState<BlogPost | null>(null)
+const [images, setImages] = useState<AIImageData[]>([])  
+const [isGenerating, setIsGenerating] = useState(false)
 
   const generateBlogPost = async () => {
     setIsGenerating(true)
     try {
-      const generatedContent = await generateBlogContent(
+      const generatedContent = await analyzeVideoAndGenerateBlogPost(
         videoData.title,
         videoData.description,
         videoData.transcript
@@ -27,9 +27,7 @@ export function BlogPostGenerator({ videoData }: BlogPostGeneratorProps) {
       setBlogPost(generatedContent)
 
       // Generate images based on the AI-suggested descriptions
-      const generatedImages = await Promise.all(
-        generatedContent.imageDescriptions.map(description => generateImage(description))
-      )
+      const generatedImages = await generateImages(generatedContent.imageDescriptions)
       setImages(generatedImages)
     } catch (error) {
       console.error('Error generating blog post:', error)
@@ -50,9 +48,9 @@ export function BlogPostGenerator({ videoData }: BlogPostGeneratorProps) {
           <p className="text-xl text-gray-600">{blogPost.metaDescription}</p>
           <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: blogPost.content }} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {images.map((src, index) => (
+            {images.map((img, index) => (
               <div key={index} className="relative aspect-square">
-                <Image src={src} alt={`AI Generated Image ${index + 1}`} layout="fill" objectFit="cover" className="rounded-lg" />
+                <Image src={img.url} alt={`AI Generated Image ${index + 1}`} layout="fill" objectFit="cover" className="rounded-lg" />
               </div>
             ))}
           </div>

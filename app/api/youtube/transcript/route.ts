@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const captions = await getSubtitles({ videoID: videoId })
+    const captions = await getSubtitles({ videoID: videoId, lang: 'en' }) // <-- Added lang
     const transcript = captions.map(caption => caption.text).join(' ')
 
     return NextResponse.json({ transcript })
